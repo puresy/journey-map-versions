@@ -1,0 +1,423 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>淳子 × bon-la 用户旅程图 V1</title>
+  <style>
+    :root {
+      --paper: #f6f0e6;
+      --paper-2: #fffaf1;
+      --ink: #1f2725;
+      --muted: #6f746e;
+      --hair: rgba(31, 39, 37, .16);
+      --hair-strong: rgba(31, 39, 37, .28);
+      --trust: #b9483d;
+      --efficiency: #2f6f73;
+      --safety: #c7972e;
+      --bon: #232b28;
+      --shadow: 0 18px 48px rgba(40, 30, 18, .10);
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; background: #e7ddcf; color: var(--ink); }
+    body {
+      font-family: "Songti SC", "Noto Serif CJK SC", "Source Han Serif SC", "Times New Roman", serif;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+    }
+
+    .stage {
+      width: min(1920px, 100vw - 48px);
+      aspect-ratio: 16 / 9;
+      min-height: 760px;
+      background:
+        radial-gradient(circle at 13% 12%, rgba(185, 72, 61, .08), transparent 26%),
+        radial-gradient(circle at 84% 82%, rgba(47, 111, 115, .10), transparent 28%),
+        linear-gradient(135deg, var(--paper-2), var(--paper));
+      border: 1px solid rgba(31, 39, 37, .12);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      position: relative;
+      padding: clamp(28px, 2.6vw, 50px);
+    }
+
+    .stage::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      opacity: .36;
+      background-image:
+        linear-gradient(rgba(31,39,37,.045) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(31,39,37,.035) 1px, transparent 1px);
+      background-size: 40px 40px, 40px 40px;
+      mask-image: linear-gradient(to bottom, rgba(0,0,0,.6), rgba(0,0,0,.12));
+    }
+
+    header {
+      position: relative;
+      z-index: 2;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 28px;
+      align-items: start;
+      margin-bottom: 24px;
+    }
+
+    .kicker {
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      font-size: 15px;
+      letter-spacing: .14em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 14px;
+    }
+
+    h1 {
+      font-size: clamp(42px, 4vw, 76px);
+      line-height: .96;
+      margin: 0;
+      letter-spacing: -.055em;
+      font-weight: 680;
+      text-wrap: balance;
+    }
+
+    .subtitle {
+      margin: 16px 0 0;
+      max-width: 900px;
+      color: #4c544e;
+      font-size: clamp(18px, 1.25vw, 24px);
+      line-height: 1.45;
+      font-family: "PingFang SC", "Noto Sans CJK SC", system-ui, sans-serif;
+    }
+
+    .scope-badge {
+      border: 1px solid var(--hair-strong);
+      padding: 16px 18px;
+      min-width: 320px;
+      background: rgba(255, 250, 241, .72);
+      backdrop-filter: blur(6px);
+      font-family: "PingFang SC", system-ui, sans-serif;
+    }
+    .scope-badge b { display: block; font-size: 20px; margin-bottom: 6px; }
+    .scope-badge span { display: block; color: var(--muted); font-size: 14px; line-height: 1.55; }
+    .scope-badge em { color: var(--trust); font-style: normal; font-weight: 650; }
+
+    .main {
+      position: relative;
+      z-index: 2;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 360px;
+      gap: 24px;
+      height: calc(100% - 168px);
+      min-height: 560px;
+    }
+
+    .journey {
+      position: relative;
+      display: grid;
+      grid-template-rows: 312px 1fr;
+      gap: 18px;
+      min-width: 0;
+    }
+
+    .chart-panel, .cards-panel, .insight-panel {
+      background: rgba(255, 250, 241, .62);
+      border: 1px solid var(--hair);
+      position: relative;
+    }
+
+    .chart-panel { padding: 20px 22px 12px; }
+    .chart-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: "PingFang SC", system-ui, sans-serif;
+      margin-bottom: 8px;
+    }
+    .chart-title { font-size: 17px; font-weight: 700; }
+    .legend { display: flex; gap: 18px; color: var(--muted); font-size: 13px; }
+    .legend i { display: inline-block; width: 22px; height: 3px; vertical-align: middle; margin-right: 7px; transform: translateY(-3px); }
+
+    svg { width: 100%; height: 238px; overflow: visible; display: block; }
+    .grid-line { stroke: rgba(31,39,37,.10); stroke-width: 1; }
+    .axis-label { font: 12px ui-monospace, monospace; fill: #8a8175; }
+    .curve { fill: none; stroke-width: 4; stroke-linecap: round; stroke-linejoin: round; }
+    .trust { stroke: var(--trust); }
+    .efficiency { stroke: var(--efficiency); }
+    .safety { stroke: var(--safety); }
+    .dot { stroke: var(--paper-2); stroke-width: 2; }
+    .stage-ticks { stroke: rgba(31,39,37,.16); stroke-dasharray: 2 6; }
+
+    .cards-panel {
+      padding: 0 0 4px;
+      display: grid;
+      grid-template-columns: repeat(8, minmax(0, 1fr));
+      gap: 0;
+      overflow: hidden;
+    }
+
+    .stage-card {
+      padding: 16px 14px 12px;
+      border-right: 1px solid rgba(31,39,37,.11);
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .stage-card:last-child { border-right: 0; }
+    .stage-card:nth-child(4) { background: rgba(185,72,61,.065); }
+    .stage-card:nth-child(6) { background: rgba(199,151,46,.06); }
+
+    .num {
+      font-family: ui-monospace, monospace;
+      color: #9b8a75;
+      font-size: 13px;
+    }
+    .stage-name {
+      font-size: clamp(16px, 1vw, 20px);
+      line-height: 1.12;
+      font-weight: 760;
+      letter-spacing: -.02em;
+      min-height: 46px;
+    }
+    .time {
+      font-family: ui-monospace, monospace;
+      color: var(--muted);
+      font-size: 12px;
+      border-top: 1px solid rgba(31,39,37,.11);
+      padding-top: 8px;
+    }
+    .event, .product {
+      font-family: "PingFang SC", system-ui, sans-serif;
+      font-size: clamp(12px, .73vw, 14px);
+      line-height: 1.42;
+      color: #3f4742;
+    }
+    .event { font-weight: 650; }
+    .product { color: #687069; margin-top: auto; }
+    .tag {
+      display: inline-block;
+      font-family: ui-monospace, monospace;
+      font-size: 10px;
+      letter-spacing: .08em;
+      color: #fffaf1;
+      background: var(--bon);
+      padding: 4px 6px;
+      width: fit-content;
+      margin-bottom: 2px;
+    }
+
+    .insight-panel {
+      padding: 22px 22px 18px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+      min-width: 0;
+    }
+    .side-title {
+      font-size: 26px;
+      line-height: 1.04;
+      letter-spacing: -.04em;
+      margin: 0;
+    }
+    .quote {
+      border-left: 4px solid var(--trust);
+      padding-left: 14px;
+      font-size: 21px;
+      line-height: 1.38;
+      font-weight: 660;
+      text-wrap: pretty;
+    }
+    .loop {
+      display: grid;
+      gap: 8px;
+      font-family: "PingFang SC", system-ui, sans-serif;
+      font-size: 14px;
+      color: #4d554f;
+      line-height: 1.5;
+    }
+    .loop-row {
+      display: grid;
+      grid-template-columns: 76px 1fr;
+      gap: 10px;
+      padding: 8px 0;
+      border-top: 1px solid rgba(31,39,37,.11);
+    }
+    .loop-row b { color: var(--ink); }
+    .triggers {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: auto;
+    }
+    .trigger-box {
+      border-top: 1px solid var(--hair-strong);
+      padding-top: 12px;
+      font-family: "PingFang SC", system-ui, sans-serif;
+      font-size: 13px;
+      line-height: 1.45;
+      color: #59615b;
+    }
+    .trigger-box b { display: block; color: var(--ink); font-size: 15px; margin-bottom: 7px; }
+    .trigger-box ul { margin: 0; padding-left: 16px; }
+    .trigger-box li { margin: 5px 0; }
+
+    .footnote {
+      position: absolute;
+      left: clamp(28px, 2.6vw, 50px);
+      right: clamp(28px, 2.6vw, 50px);
+      bottom: 18px;
+      display: flex;
+      justify-content: space-between;
+      color: #81776b;
+      font: 12px "PingFang SC", system-ui, sans-serif;
+      z-index: 3;
+    }
+
+    @media (max-width: 1300px) {
+      body { padding: 0; }
+      .stage { width: 100vw; min-height: 100vh; aspect-ratio: auto; }
+      header, .main { grid-template-columns: 1fr; }
+      .main { height: auto; }
+      .insight-panel { min-height: 360px; }
+      .cards-panel { grid-template-columns: repeat(4, 1fr); }
+      .stage-card:nth-child(4) { border-right: 0; }
+      .journey { grid-template-rows: auto auto; }
+    }
+  </style>
+</head>
+<body>
+  <main class="stage" aria-label="淳子 × bon-la 用户旅程图 V1">
+    <header>
+      <div>
+        <div class="kicker">USER RESEARCH JOURNEY MAP · V1</div>
+        <h1>淳子 × bon-la：从新鲜感到真实工作台</h1>
+        <p class="subtitle">一条由任务、记忆、事故和修正规则组成的信任曲线。不是线性升温，当然了，真实产品哪有这么听话。</p>
+      </div>
+      <div class="scope-badge">
+        <b>范围锁定：bon-la only</b>
+        <span>本版只分析 bon-la / bonjour 这台电脑上的 Cola 使用旅程。<em>mini-la 与多 AI 入口密度图不混入 V1</em>，避免把不同入口的人设与任务角色搅成一锅粥。</span>
+      </div>
+    </header>
+
+    <section class="main">
+      <div class="journey">
+        <section class="chart-panel" aria-label="信任、效率、安全感三条曲线">
+          <div class="chart-head">
+            <div class="chart-title">三条体验线：信任 / 效率 / 安全感（1–4 草案评分）</div>
+            <div class="legend">
+              <span><i style="background:var(--trust)"></i>信任</span>
+              <span><i style="background:var(--efficiency)"></i>效率</span>
+              <span><i style="background:var(--safety)"></i>安全感</span>
+            </div>
+          </div>
+          <svg viewBox="0 0 1320 238" role="img" aria-label="八个阶段的信任效率安全感曲线">
+            <line class="grid-line" x1="40" y1="24" x2="1280" y2="24" />
+            <line class="grid-line" x1="40" y1="72" x2="1280" y2="72" />
+            <line class="grid-line" x1="40" y1="120" x2="1280" y2="120" />
+            <line class="grid-line" x1="40" y1="168" x2="1280" y2="168" />
+            <text class="axis-label" x="10" y="28">4</text>
+            <text class="axis-label" x="10" y="76">3</text>
+            <text class="axis-label" x="10" y="124">2</text>
+            <text class="axis-label" x="10" y="172">1</text>
+            <g>
+              <line class="stage-ticks" x1="80" y1="18" x2="80" y2="186" />
+              <line class="stage-ticks" x1="245" y1="18" x2="245" y2="186" />
+              <line class="stage-ticks" x1="410" y1="18" x2="410" y2="186" />
+              <line class="stage-ticks" x1="575" y1="18" x2="575" y2="186" />
+              <line class="stage-ticks" x1="740" y1="18" x2="740" y2="186" />
+              <line class="stage-ticks" x1="905" y1="18" x2="905" y2="186" />
+              <line class="stage-ticks" x1="1070" y1="18" x2="1070" y2="186" />
+              <line class="stage-ticks" x1="1235" y1="18" x2="1235" y2="186" />
+            </g>
+            <!-- Scores: 信任 2,4,4,3,4,3,4,4；效率 2,3,4,3,4,2,4,4；安全感 2,3,2,1,3,3,3,3 -->
+            <path class="curve trust" d="M80 120 C135 100 190 44 245 24 S355 24 410 24 S520 70 575 72 S685 24 740 24 S850 72 905 72 S1015 24 1070 24 S1180 24 1235 24" />
+            <path class="curve efficiency" d="M80 120 C135 110 190 78 245 72 S355 24 410 24 S520 72 575 72 S685 24 740 24 S850 122 905 120 S1015 24 1070 24 S1180 24 1235 24" />
+            <path class="curve safety" d="M80 120 C135 108 190 78 245 72 S355 120 410 120 S520 168 575 168 S685 72 740 72 S850 72 905 72 S1015 72 1070 72 S1180 72 1235 72" />
+            <g fill="var(--trust)">
+              <circle class="dot" cx="80" cy="120" r="5"/><circle class="dot" cx="245" cy="24" r="5"/><circle class="dot" cx="410" cy="24" r="5"/><circle class="dot" cx="575" cy="72" r="5"/><circle class="dot" cx="740" cy="24" r="5"/><circle class="dot" cx="905" cy="72" r="5"/><circle class="dot" cx="1070" cy="24" r="5"/><circle class="dot" cx="1235" cy="24" r="5"/>
+            </g>
+            <g fill="var(--efficiency)">
+              <circle class="dot" cx="80" cy="120" r="5"/><circle class="dot" cx="245" cy="72" r="5"/><circle class="dot" cx="410" cy="24" r="5"/><circle class="dot" cx="575" cy="72" r="5"/><circle class="dot" cx="740" cy="24" r="5"/><circle class="dot" cx="905" cy="120" r="5"/><circle class="dot" cx="1070" cy="24" r="5"/><circle class="dot" cx="1235" cy="24" r="5"/>
+            </g>
+            <g fill="var(--safety)">
+              <circle class="dot" cx="80" cy="120" r="5"/><circle class="dot" cx="245" cy="72" r="5"/><circle class="dot" cx="410" cy="120" r="5"/><circle class="dot" cx="575" cy="168" r="5"/><circle class="dot" cx="740" cy="72" r="5"/><circle class="dot" cx="905" cy="72" r="5"/><circle class="dot" cx="1070" cy="72" r="5"/><circle class="dot" cx="1235" cy="72" r="5"/>
+            </g>
+          </svg>
+        </section>
+
+        <section class="cards-panel" aria-label="八个旅程阶段">
+          <article class="stage-card">
+            <span class="num">01</span><div class="stage-name">初识与画像建立</div><div class="time">04-01 — 04-02</div>
+            <div class="event"><span class="tag">EVENT</span><br>onboarding、自我介绍、第一次不满：重复索取已给信息。</div>
+            <div class="product">第一次输入就是交付，不是预热闲聊。</div>
+          </article>
+          <article class="stage-card">
+            <span class="num">02</span><div class="stage-name">连续性与身份生成</div><div class="time">04-03 — 04-10</div>
+            <div class="event"><span class="tag">EVENT</span><br>Cola 生日、自画像、黑猫，开始测试「是不是同一个你」。</div>
+            <div class="product">身份感来自记忆锚点，而不是皮肤。</div>
+          </article>
+          <article class="stage-card">
+            <span class="num">03</span><div class="stage-name">工作流扩展</div><div class="time">04-13 — 04-17</div>
+            <div class="event"><span class="tag">EVENT</span><br>iCloud JSON 同步试验、文件覆盖冲突、bon-la 重任务定位。</div>
+            <div class="product">多设备不能简单合并人格。</div>
+          </article>
+          <article class="stage-card">
+            <span class="num">04</span><div class="stage-name">信任破裂与规则固化</div><div class="time">04-20 — 04-30</div>
+            <div class="event"><span class="tag">EVENT</span><br>余额焦虑、验算要求、过度采集、版本覆盖触发生气。</div>
+            <div class="product">信任底线：费用、版本、数据、边界。</div>
+          </article>
+          <article class="stage-card">
+            <span class="num">05</span><div class="stage-name">项目型生产力验证</div><div class="time">05-01 — 05-10</div>
+            <div class="event"><span class="tag">EVENT</span><br>伪科普系统、GitHub、CI、周报，多产物串联。</div>
+            <div class="product">越像工作台，越需要版本治理。</div>
+          </article>
+          <article class="stage-card">
+            <span class="num">06</span><div class="stage-name">协同挫折与速度校准</div><div class="time">05-11 — 05-15</div>
+            <div class="event"><span class="tag">EVENT</span><br>OCR 太慢，Claude 先完成，Cola 转向校对与接续。</div>
+            <div class="product">价值不一定是抢首稿，也可以是复核。</div>
+          </article>
+          <article class="stage-card">
+            <span class="num">07</span><div class="stage-name">产品战略反思与模型迁移</div><div class="time">05-19 — 05-20 白天</div>
+            <div class="event"><span class="tag">EVENT</span><br>讨论外骨骼会不会被 GPT 吃掉；「真文艺」纠偏。</div>
+            <div class="product">能力在关系之前，模型可换。</div>
+          </article>
+          <article class="stage-card">
+            <span class="num">08</span><div class="stage-name">多入口真实使用</div><div class="time">05-20 晚</div>
+            <div class="event"><span class="tag">EVENT</span><br>微信追问任务、电脑清理范围校准、提出用户旅程图。</div>
+            <div class="product">微信降低门槛，但任务判断要接得住。</div>
+          </article>
+        </section>
+      </div>
+
+      <aside class="insight-panel" aria-label="核心洞察">
+        <h2 class="side-title">关系不是卖点，能持续工作才是。</h2>
+        <div class="quote">「被理解 → 交付任务 → 出事故 → 生气/焦虑 → 规则固化 → 继续交付更复杂任务。」</div>
+        <div class="loop">
+          <div class="loop-row"><b>保留原因</b><span>文件、任务、记忆、工具和产物能接上；不是单纯陪伴感。</span></div>
+          <div class="loop-row"><b>修复机制</b><span>用户不是怕 AI 犯错，是怕犯错后不形成硬规则。</span></div>
+          <div class="loop-row"><b>产品风险</b><span>版本覆盖、后台消耗、状态不可见、多代理分叉，会直接击穿安全感。</span></div>
+        </div>
+        <div class="triggers">
+          <div class="trigger-box">
+            <b>满意触发</b>
+            <ul><li>快速执行，不反复问</li><li>读到历史与本地文件</li><li>复杂项目能串联</li><li>纠正后真的改变</li></ul>
+          </div>
+          <div class="trigger-box">
+            <b>不满 / 焦虑</b>
+            <ul><li>卡住不换路</li><li>数据不能验算</li><li>覆盖旧版本</li><li>过度采集和偷换范围</li></ul>
+          </div>
+        </div>
+      </aside>
+    </section>
+
+    <div class="footnote">
+      <span>数据源：淳子-bon-la 用户旅程图草案 · 2026-04-01 至 2026-05-20</span>
+      <span>V1 · 非多 AI 密度图 · mini-la excluded</span>
+    </div>
+  </main>
+</body>
+</html>

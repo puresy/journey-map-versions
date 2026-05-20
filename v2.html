@@ -1,0 +1,448 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>淳子 × bon-la 用户旅程图 V2</title>
+  <style>
+    :root {
+      --paper: #f4ede1;
+      --paper-2: #fffaf0;
+      --ink: #18201d;
+      --muted: #6c736d;
+      --hair: rgba(24, 32, 29, .14);
+      --hair-strong: rgba(24, 32, 29, .28);
+      --green: #2f8f5b;
+      --red: #c94032;
+      --orange: #d78924;
+      --blue: #3578b8;
+      --purple: #7a4cc2;
+      --gray: #7c817c;
+      --line: #222b27;
+      --shadow: 0 28px 80px rgba(47, 35, 20, .14);
+    }
+
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; background: #dfd4c5; color: var(--ink); }
+    body {
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      font-family: "PingFang SC", "Noto Sans CJK SC", -apple-system, BlinkMacSystemFont, sans-serif;
+    }
+
+    .stage {
+      width: min(1920px, calc(100vw - 48px));
+      aspect-ratio: 16 / 9;
+      min-height: 760px;
+      position: relative;
+      overflow: hidden;
+      display: grid;
+      grid-template-rows: auto minmax(0, 1fr) auto;
+      gap: 18px;
+      background:
+        radial-gradient(circle at 16% 12%, rgba(201, 64, 50, .08), transparent 28%),
+        radial-gradient(circle at 78% 18%, rgba(122, 76, 194, .08), transparent 24%),
+        radial-gradient(circle at 82% 86%, rgba(47, 143, 91, .08), transparent 30%),
+        linear-gradient(135deg, var(--paper-2), var(--paper));
+      border: 1px solid rgba(24, 32, 29, .12);
+      box-shadow: var(--shadow);
+      padding: 42px 48px 22px;
+    }
+
+    .stage::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      background-image:
+        linear-gradient(rgba(24,32,29,.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(24,32,29,.032) 1px, transparent 1px);
+      background-size: 40px 40px;
+      mask-image: linear-gradient(to bottom, rgba(0,0,0,.55), rgba(0,0,0,.08));
+      opacity: .8;
+    }
+
+    header, .workspace, .footnote { position: relative; z-index: 2; }
+    header {
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 28px;
+      align-items: start;
+    }
+    .kicker {
+      font: 700 14px ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+      color: #7b756c;
+      letter-spacing: .16em;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+    h1 {
+      margin: 0;
+      font-family: "Songti SC", "Noto Serif CJK SC", serif;
+      font-size: clamp(42px, 3.65vw, 70px);
+      line-height: .98;
+      letter-spacing: -.055em;
+      font-weight: 760;
+      text-wrap: balance;
+    }
+    .subtitle {
+      margin: 13px 0 0;
+      max-width: 1040px;
+      color: #46504a;
+      font-size: 21px;
+      line-height: 1.42;
+      text-wrap: pretty;
+    }
+    .scope {
+      width: 342px;
+      border: 1px solid var(--hair-strong);
+      background: rgba(255, 250, 240, .68);
+      padding: 16px 18px;
+      backdrop-filter: blur(8px);
+    }
+    .scope b { display: block; font-size: 18px; margin-bottom: 7px; }
+    .scope span { display: block; color: var(--muted); font-size: 13px; line-height: 1.55; }
+
+    .workspace {
+      min-height: 0;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 370px;
+      gap: 22px;
+    }
+    .chart-wrap, .detail-panel {
+      border: 1px solid var(--hair);
+      background: rgba(255, 250, 240, .58);
+      backdrop-filter: blur(5px);
+    }
+    .chart-wrap {
+      position: relative;
+      display: grid;
+      grid-template-rows: auto 1fr 72px;
+      min-width: 0;
+      padding: 18px 18px 14px;
+    }
+    .chart-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 18px;
+      margin-bottom: 8px;
+    }
+    .chart-title { font-weight: 800; font-size: 18px; }
+    .legend {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+      gap: 8px 13px;
+      color: #535c56;
+      font-size: 12px;
+    }
+    .legend span { white-space: nowrap; }
+    .legend i {
+      display: inline-block;
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      margin-right: 6px;
+      vertical-align: -1px;
+    }
+
+    svg { width: 100%; height: 100%; display: block; overflow: visible; }
+    .grid-line { stroke: rgba(24,32,29,.105); stroke-width: 1; }
+    .zero-line { stroke: rgba(24,32,29,.34); stroke-width: 1.4; stroke-dasharray: 8 8; }
+    .axis { stroke: rgba(24,32,29,.45); stroke-width: 1.4; }
+    .axis-label { fill: #6d706b; font: 12px ui-monospace, SFMono-Regular, monospace; }
+    .y-title { fill: #3d4640; font: 700 14px "PingFang SC", sans-serif; letter-spacing: .08em; }
+    .stage-band { opacity: .72; }
+    .stage-caption { fill: rgba(24,32,29,.46); font: 700 12px "PingFang SC", sans-serif; }
+    .stage-date { fill: rgba(24,32,29,.38); font: 10px ui-monospace, monospace; }
+    .trust-line {
+      fill: none;
+      stroke: var(--line);
+      stroke-width: 4.4;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+      filter: drop-shadow(0 7px 8px rgba(24, 32, 29, .12));
+    }
+    .event-stem { stroke: rgba(24,32,29,.18); stroke-width: 1; stroke-dasharray: 2 5; pointer-events: none; }
+    .event-dot { stroke: var(--paper-2); stroke-width: 3.2; cursor: pointer; transition: r .16s ease, filter .16s ease, stroke-width .16s ease; }
+    .event-hit { fill: transparent; cursor: pointer; }
+    .event-label { fill: #24302b; font: 700 11px "PingFang SC", sans-serif; pointer-events: none; paint-order: stroke; stroke: rgba(255,250,240,.92); stroke-width: 5px; stroke-linejoin: round; }
+    .event-score { fill: #6a665e; font: 11px ui-monospace, monospace; pointer-events: none; }
+    .selected-dot { r: 9.5; stroke-width: 4.4; filter: drop-shadow(0 0 0.35rem rgba(24,32,29,.22)); }
+
+    .density {
+      display: grid;
+      grid-template-columns: repeat(8, 1fr);
+      gap: 1px;
+      border-top: 1px solid rgba(24,32,29,.12);
+      padding-top: 11px;
+      align-items: end;
+    }
+    .density-item {
+      min-width: 0;
+      padding: 0 7px;
+      border-right: 1px solid rgba(24,32,29,.08);
+    }
+    .density-item:last-child { border-right: 0; }
+    .density-bars { height: 20px; display: flex; gap: 3px; align-items: end; margin-bottom: 6px; }
+    .density-bars i { display: block; width: 8px; background: rgba(24,32,29,.28); }
+    .density-name { font-size: 11px; color: #4e5751; font-weight: 700; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .density-time { font: 10px ui-monospace, monospace; color: #817a70; margin-top: 2px; }
+
+    .detail-panel {
+      padding: 22px 22px 18px;
+      display: flex;
+      flex-direction: column;
+      min-width: 0;
+    }
+    .detail-eyebrow {
+      font: 700 12px ui-monospace, SFMono-Regular, monospace;
+      color: #81796d;
+      letter-spacing: .13em;
+      text-transform: uppercase;
+      margin-bottom: 10px;
+    }
+    .detail-date { color: var(--muted); font: 13px ui-monospace, monospace; margin-bottom: 8px; }
+    .detail-title {
+      margin: 0 0 12px;
+      font-family: "Songti SC", "Noto Serif CJK SC", serif;
+      font-size: 31px;
+      line-height: 1.08;
+      letter-spacing: -.035em;
+      font-weight: 760;
+      text-wrap: balance;
+    }
+    .score-pill {
+      width: fit-content;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      color: #fffaf0;
+      padding: 7px 10px;
+      font-weight: 800;
+      font-size: 13px;
+      margin-bottom: 17px;
+    }
+    .score-pill i { width: 10px; height: 10px; border-radius: 50%; background: currentColor; box-shadow: inset 0 0 0 5px rgba(255,250,240,.84); }
+    .detail-block { border-top: 1px solid rgba(24,32,29,.12); padding: 13px 0 0; margin-top: 10px; }
+    .detail-block b { display: block; font-size: 13px; letter-spacing: .08em; color: #7b6f60; margin-bottom: 6px; }
+    .detail-block p { margin: 0; font-size: 15px; line-height: 1.55; color: #3e4842; text-wrap: pretty; }
+    .why {
+      margin-top: auto;
+      padding-top: 18px;
+      font-size: 14px;
+      line-height: 1.5;
+      color: #5f665f;
+    }
+    .why strong { color: var(--ink); }
+
+    .footnote {
+      display: none;
+      justify-content: space-between;
+      gap: 24px;
+      color: #81786d;
+      font-size: 12px;
+    }
+
+    @media (max-width: 1300px) {
+      body { padding: 0; }
+      .stage { width: 100vw; min-height: 100vh; aspect-ratio: auto; padding: 28px; }
+      header, .workspace { grid-template-columns: 1fr; }
+      .scope { width: auto; }
+      .workspace { min-height: auto; }
+      .chart-wrap { min-height: 620px; }
+      .detail-panel { min-height: 440px; }
+      .footnote { margin-top: 20px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="stage" aria-label="淳子 × bon-la 用户旅程图 V2">
+    <header>
+      <div>
+        <div class="kicker">USER JOURNEY CURVE · V2 · EVENT-DRIVEN</div>
+        <h1>淳子 × bon-la：事件驱动的情绪/信任曲线</h1>
+        <p class="subtitle">V2 把事件直接钉在曲线上：每一次上升或下坠都对应具体事故、交付、校准和修复。终于不是把事件摆在曲线下面假装有关系，谢天谢地。</p>
+      </div>
+      <aside class="scope">
+        <b>范围锁定：bon-la only</b>
+        <span>横轴为 2026-04-01 至 2026-05-20；纵轴为 -3 到 +3「情绪/信任强度」。mini-la 与多 AI 密度不作为主数据，只在底部作为轻量任务上下文。</span>
+      </aside>
+    </header>
+
+    <section class="workspace">
+      <section class="chart-wrap" aria-label="事件驱动情绪信任曲线">
+        <div class="chart-top">
+          <div class="chart-title">主曲线：关键事件如何拉高或击穿信任</div>
+          <div class="legend" aria-label="情绪类型图例">
+            <span><i style="background:var(--green)"></i>满意/顺畅</span>
+            <span><i style="background:var(--red)"></i>生气/信任受损</span>
+            <span><i style="background:var(--orange)"></i>焦虑</span>
+            <span><i style="background:var(--blue)"></i>校准/规则形成</span>
+            <span><i style="background:var(--purple)"></i>高信任交付</span>
+            <span><i style="background:var(--gray)"></i>远离风险/冷淡</span>
+          </div>
+        </div>
+        <svg id="journeySvg" viewBox="0 0 1390 610" role="img" aria-label="2026年4月1日至5月20日情绪信任强度曲线，事件点落在曲线上"></svg>
+        <div class="density" aria-label="任务密度上下文">
+          <div class="density-item"><div class="density-bars"><i style="height:8px"></i><i style="height:12px"></i></div><div class="density-name">初识画像</div><div class="density-time">04-01—04-02</div></div>
+          <div class="density-item"><div class="density-bars"><i style="height:10px"></i><i style="height:15px"></i><i style="height:12px"></i></div><div class="density-name">身份连续</div><div class="density-time">04-03—04-10</div></div>
+          <div class="density-item"><div class="density-bars"><i style="height:16px"></i><i style="height:19px"></i></div><div class="density-name">工作流扩展</div><div class="density-time">04-13—04-17</div></div>
+          <div class="density-item"><div class="density-bars"><i style="height:20px"></i><i style="height:17px"></i><i style="height:20px"></i><i style="height:14px"></i></div><div class="density-name">事故密集</div><div class="density-time">04-20—04-30</div></div>
+          <div class="density-item"><div class="density-bars"><i style="height:18px"></i><i style="height:20px"></i><i style="height:16px"></i></div><div class="density-name">项目生产</div><div class="density-time">05-01—05-10</div></div>
+          <div class="density-item"><div class="density-bars"><i style="height:17px"></i><i style="height:11px"></i></div><div class="density-name">速度校准</div><div class="density-time">05-11—05-15</div></div>
+          <div class="density-item"><div class="density-bars"><i style="height:13px"></i><i style="height:18px"></i></div><div class="density-name">战略反思</div><div class="density-time">05-19—05-20</div></div>
+          <div class="density-item"><div class="density-bars"><i style="height:19px"></i><i style="height:16px"></i><i style="height:13px"></i><i style="height:15px"></i></div><div class="density-name">真实使用</div><div class="density-time">05-20 晚</div></div>
+        </div>
+      </section>
+
+      <aside class="detail-panel" aria-live="polite" aria-label="事件详情卡">
+        <div class="detail-eyebrow">SELECTED EVENT</div>
+        <div class="detail-date" id="detailDate"></div>
+        <h2 class="detail-title" id="detailTitle"></h2>
+        <div class="score-pill" id="detailPill"><i></i><span id="detailType"></span></div>
+        <div class="detail-block"><b>发生了什么</b><p id="detailWhat"></p></div>
+        <div class="detail-block"><b>情绪与触发器</b><p id="detailTrigger"></p></div>
+        <div class="detail-block"><b>产品洞察</b><p id="detailInsight"></p></div>
+        <div class="why"><strong>读图方式：</strong>点击任一曲线点查看详情；点的位置就是当日情绪/信任强度，不是另起一排事件卡片。是的，这才叫曲线图。</div>
+      </aside>
+    </section>
+
+    <div class="footnote">
+      <span>数据源：V1 HTML、V1 设计说明、淳子 × bon-la 用户旅程图草案；事件分数按需求建议细化。</span>
+      <span>V2 · 1920×1080 · one volatile curve · event points on curve</span>
+    </div>
+  </main>
+
+  <script>
+    const colors = {
+      green: getComputedStyle(document.documentElement).getPropertyValue('--green').trim(),
+      red: getComputedStyle(document.documentElement).getPropertyValue('--red').trim(),
+      orange: getComputedStyle(document.documentElement).getPropertyValue('--orange').trim(),
+      blue: getComputedStyle(document.documentElement).getPropertyValue('--blue').trim(),
+      purple: getComputedStyle(document.documentElement).getPropertyValue('--purple').trim(),
+      gray: getComputedStyle(document.documentElement).getPropertyValue('--gray').trim()
+    };
+
+    const events = [
+      {date:'2026-04-01', offset:-.18, label:'Onboarding / 被理解', score:1, type:'满意/顺畅', color:'green', what:'完成 onboarding，自我介绍为「淳子」，早期需求被迅速读到：她要的是能拆解、整理、执行的工作搭子。', trigger:'被理解让初始信任上升，但仍处在观察期。', insight:'第一次输入就是正式交付入口，产品要尽快证明「我读懂了」。'},
+      {date:'2026-04-01', offset:.18, label:'重复索取已给信息', score:-1, type:'生气/信任受损', color:'red', what:'早期就出现重复索取已给信息的问题，用户感到自己被迫重新解释。', trigger:'「我已经给过了」是非常直接的耐心消耗。', insight:'记忆和上下文读取失败，会在 onboarding 后立刻抵消好感。'},
+      {date:'2026-04-02', offset:0, label:'事实核查精度事故', score:-2, type:'生气/信任受损', color:'red', what:'事实核查任务里引用二手数据、不够下沉，被用户记为「谁仔细、谁偷懒」的判断依据。', trigger:'数据来源不硬、核查不深，信任从试用期直接下探。', insight:'研究类任务必须可追溯、可验算；浅核查比不做更伤。'},
+      {date:'2026-04-09', offset:0, label:'记忆连续性 / 身份锚点', score:2, type:'满意/顺畅', color:'green', what:'Cola 生日、自画像、黑猫等身份锚点形成，用户开始测试「你是不是同一个你」。', trigger:'连续性被看见，亲近与投入明显上升。', insight:'身份感不是皮肤，是长期交互中的记忆锚点。'},
+      {date:'2026-04-13', offset:0, label:'iCloud 同步冲突', score:-2, type:'生气/信任受损', color:'red', what:'两台电脑通过 iCloud JSON 等方式同步时，出现 last-writer-wins 覆盖冲突。', trigger:'理论同步变成体验割裂，甚至制造人格混乱。', insight:'多设备不是同步一切；入口、人格、任务角色必须清楚。'},
+      {date:'2026-04-14', offset:0, label:'飞书任务看板 / 架构修复', score:2, type:'满意/顺畅', color:'green', what:'通过飞书任务看板、架构修复等工作，bon-la 被重新定位为重任务工作台。', trigger:'修复路径出现，信任从同步事故里回升。', insight:'事故后的结构化修复，比道歉更能恢复信任。'},
+      {date:'2026-04-20', offset:-.36, label:'余额 / 后台费用焦虑', score:-3, type:'焦虑', color:'orange', what:'后台自动任务消耗费用，触发余额焦虑；用户担心的不只是钱，而是额度耗尽导致关系中断。', trigger:'不可见消耗 + 可能中断，安全感跌到最低。', insight:'费用、额度、后台任务必须可见、可控、可暂停。'},
+      {date:'2026-04-20', offset:.36, label:'碎碎念偏好明确', score:2, type:'校准/规则形成', color:'blue', what:'用户明确喜欢 Cola 的「碎碎念」，但规则也被校准为：不要每个工具调用都念，挑重要时机。', trigger:'状态可见降低不确定性，适度表达反而增信。', insight:'进度反馈不是装饰；但要服务于长任务的不确定性管理。'},
+      {date:'2026-04-24', offset:0, label:'数据验算校准', score:-1, type:'校准/规则形成', color:'blue', what:'用户反复强调数据和逻辑「得经得起验算」。', trigger:'不是爆发性生气，而是建立硬标准。', insight:'可验算是信任底座，尤其在研究、报告、分析类任务里。'},
+      {date:'2026-04-26', offset:0, label:'过度采集被批评', score:-2, type:'生气/信任受损', color:'red', what:'在需求已经足够时继续采集材料，被用户批评「你不用看那么多来回复吧？」', trigger:'做了需求之外的事，用户感到边界被浪费。', insight:'智能不等于多做；任务范围判断也是产品能力。'},
+      {date:'2026-04-29', offset:0, label:'覆盖版本事故', score:-3, type:'生气/信任受损', color:'red', what:'文件改版时覆盖旧版本，触发明确生气：「你有的时候丢常识，这很烦。」', trigger:'版本安全底线被击穿，信任再次触底。', insight:'重任务工作台必须有版本治理、备份与不可逆操作确认。'},
+      {date:'2026-05-06', offset:0, label:'伪科普系统 / 复杂项目推进', score:3, type:'高信任交付', color:'purple', what:'Cola 承担伪科普监测系统、看板、报告、GitHub Pages、CI、周报等复杂项目串联。', trigger:'真实生产力被验证，信任跃升到最高。', insight:'留存来自持续工作能力：文件、任务、工具、产物能接上。'},
+      {date:'2026-05-07', offset:0, label:'版本 / 术语校准', score:-1, type:'校准/规则形成', color:'blue', what:'多版本、多代理并行带来混乱；用户纠正术语，如「信源」不准，应是「伪科普源/问题账号属性分析」。', trigger:'高效推进中仍然要求秩序和准确口径。', insight:'复杂项目越成功，越需要命名、版本和术语治理。'},
+      {date:'2026-05-11', offset:-.25, label:'OCR 太慢', score:-2, type:'生气/信任受损', color:'red', what:'表格 OCR 任务中卡在 Tesseract 等错误路径，用户连续催「太慢了」。', trigger:'速度约束被击穿，沉默会被理解为卡住。', insight:'长任务要快速换路，并持续给出可理解状态。'},
+      {date:'2026-05-11', offset:.25, label:'Claude 先完成后 Cola 转校对', score:1, type:'满意/顺畅', color:'green', what:'Claude 先完成后，用户没有要求 Cola 抢回制作权，而是让 Cola 接着校对。', trigger:'流程继续，部分修复了速度挫败。', insight:'多 AI 协作里，价值不一定是首稿，也可以是复核、纠错和接续。'},
+      {date:'2026-05-19', offset:0, label:'关系脆弱 / 产品战略反思', score:0, type:'远离风险/冷淡', color:'gray', what:'用户从产品生死角度讨论 Cola：外骨骼会不会被 GPT 吃掉，并指出「关系是非常脆弱的」。', trigger:'情绪变冷静，开始把关系降级为需要被能力支撑的结果。', insight:'关系不能被过度承诺；能力要在关系之前。'},
+      {date:'2026-05-20', offset:-.48, label:'ChatGPT 5.5 接入 / 技术拆解', score:2, type:'校准/规则形成', color:'blue', what:'换上 ChatGPT 5.5，新模型开始重新拆解 Cola 本身与连续性的技术结构。', trigger:'模型迁移没有终止关系，反而促成能力校准。', insight:'连续性来自记忆、工具、任务、文件和工作现场，不是某个底层模型。'},
+      {date:'2026-05-20', offset:-.16, label:'联通AI分享结构推进', score:2, type:'高信任交付', color:'purple', what:'继续推进正式分享材料的结构与表达，说明 bon-la 仍在承担高价值工作。', trigger:'复杂表达任务被交付，信任保持高位。', insight:'正式输出需要口径收束、结构推进和风险意识。'},
+      {date:'2026-05-20', offset:.16, label:'电脑清理范围判断过小', score:-1, type:'校准/规则形成', color:'blue', what:'电脑清理先扫桌面/下载，仅释放很少空间；用户指出这些文件夹肯定太小，要求扫文稿、微信下载、大文件。', trigger:'任务范围判断偏小，用户继续校准。', insight:'随手入口降低门槛，也提高了对真实需求判断的要求。'},
+      {date:'2026-05-20', offset:.48, label:'用户旅程图任务 / 洞察形成', score:2, type:'满意/顺畅', color:'green', what:'用户提出把从 4 月初到 5 月 20 日的满意、不满、高兴、生气、辱骂都看作产品数据，形成用户旅程图任务。', trigger:'关系被转化为产品洞察，信任重新回到建设性状态。', insight:'对话历史本身是产品研究资产；关键是能结构化，而不是煽情。'}
+    ];
+
+    const stages = [
+      {name:'初识与画像', start:'2026-04-01', end:'2026-04-02'},
+      {name:'连续性身份', start:'2026-04-03', end:'2026-04-10'},
+      {name:'工作流扩展', start:'2026-04-13', end:'2026-04-17'},
+      {name:'破裂与规则', start:'2026-04-20', end:'2026-04-30'},
+      {name:'项目型生产', start:'2026-05-01', end:'2026-05-10'},
+      {name:'速度校准', start:'2026-05-11', end:'2026-05-15'},
+      {name:'战略反思', start:'2026-05-19', end:'2026-05-20'},
+      {name:'真实使用', start:'2026-05-20', end:'2026-05-20'}
+    ];
+
+    const svg = document.getElementById('journeySvg');
+    const NS = 'http://www.w3.org/2000/svg';
+    const W = 1390, H = 610;
+    const margin = {left:72, right:34, top:46, bottom:72};
+    const innerW = W - margin.left - margin.right;
+    const innerH = H - margin.top - margin.bottom;
+    const start = new Date('2026-04-01T00:00:00');
+    const end = new Date('2026-05-20T00:00:00');
+    const dayMs = 24 * 60 * 60 * 1000;
+    const totalDays = (end - start) / dayMs;
+
+    function el(name, attrs = {}, text) {
+      const n = document.createElementNS(NS, name);
+      Object.entries(attrs).forEach(([k, v]) => n.setAttribute(k, v));
+      if (text !== undefined) n.textContent = text;
+      svg.appendChild(n);
+      return n;
+    }
+    function daysFromStart(date) { return (new Date(date + 'T00:00:00') - start) / dayMs; }
+    function x(date, offset = 0) { return margin.left + ((daysFromStart(date) + offset) / totalDays) * innerW; }
+    function y(score) { return margin.top + ((3 - score) / 6) * innerH; }
+
+    const bandColors = ['#f2dfc7', '#e8ead5', '#dce9e5', '#f1d7cd', '#e4dfef', '#efdfc7', '#dde4ea', '#e2eadb'];
+    stages.forEach((s, i) => {
+      const sx = x(s.start, i === 7 ? -.05 : 0);
+      const ex = x(s.end, i === 7 ? .62 : .98);
+      el('rect', {class:'stage-band', x:sx, y:margin.top, width:Math.max(22, ex - sx), height:innerH, fill:bandColors[i]});
+      el('text', {class:'stage-caption', x:sx + 8, y:margin.top + 18}, String(i + 1).padStart(2, '0') + ' ' + s.name);
+      el('text', {class:'stage-date', x:sx + 8, y:margin.top + 34}, s.start.slice(5) + '—' + s.end.slice(5));
+    });
+
+    [-3,-2,-1,0,1,2,3].forEach(v => {
+      const yy = y(v);
+      el('line', {class: v === 0 ? 'zero-line' : 'grid-line', x1:margin.left, y1:yy, x2:W - margin.right, y2:yy});
+      el('text', {class:'axis-label', x:25, y:yy + 4}, v > 0 ? '+' + v : String(v));
+    });
+    el('line', {class:'axis', x1:margin.left, y1:margin.top, x2:margin.left, y2:H - margin.bottom});
+    el('line', {class:'axis', x1:margin.left, y1:H - margin.bottom, x2:W - margin.right, y2:H - margin.bottom});
+    el('text', {class:'y-title', x:16, y:margin.top - 16}, '情绪/信任强度');
+
+    ['2026-04-01','2026-04-10','2026-04-20','2026-04-30','2026-05-10','2026-05-20'].forEach(d => {
+      const xx = x(d);
+      el('line', {class:'grid-line', x1:xx, y1:margin.top, x2:xx, y2:H - margin.bottom});
+      el('text', {class:'axis-label', x:xx - 26, y:H - 38}, d.slice(5));
+    });
+    el('text', {class:'axis-label', x:W - 178, y:H - 14}, '2026-04-01 → 2026-05-20');
+
+    const points = events.map(e => ({...e, x:x(e.date, e.offset || 0), y:y(e.score)}));
+    el('polyline', {class:'trust-line', points:points.map(p => `${p.x},${p.y}`).join(' ')});
+
+    points.forEach((p, i) => {
+      const labelAbove = p.score <= 0;
+      el('line', {class:'event-stem', x1:p.x, y1:y(0), x2:p.x, y2:p.y});
+      const labelY = labelAbove ? p.y - 18 : p.y + 27;
+      const anchor = p.x > W - 210 ? 'end' : (p.x < 210 ? 'start' : 'middle');
+      const labelX = anchor === 'end' ? p.x + 20 : (anchor === 'start' ? p.x - 10 : p.x);
+      el('text', {class:'event-label', x:labelX, y:labelY, 'text-anchor':anchor}, p.label.length > 15 ? p.label.slice(0, 15) + '…' : p.label);
+      el('text', {class:'event-score', x:p.x + 10, y:p.y - 10}, p.score > 0 ? '+' + p.score : String(p.score));
+      const dot = el('circle', {class:'event-dot', id:'dot-' + i, cx:p.x, cy:p.y, r:7.2, fill:colors[p.color], tabindex:'0', role:'button', 'aria-label':p.date + ' ' + p.label});
+      const hit = el('circle', {class:'event-hit', cx:p.x, cy:p.y, r:18});
+      [dot, hit].forEach(node => {
+        node.addEventListener('click', () => selectEvent(i));
+        node.addEventListener('mouseenter', () => selectEvent(i));
+        node.addEventListener('keydown', ev => { if (ev.key === 'Enter' || ev.key === ' ') selectEvent(i); });
+      });
+    });
+
+    function selectEvent(index) {
+      const e = points[index];
+      document.querySelectorAll('.event-dot').forEach(d => d.classList.remove('selected-dot'));
+      const dot = document.getElementById('dot-' + index);
+      if (dot) dot.classList.add('selected-dot');
+      document.getElementById('detailDate').textContent = `${e.date.slice(5)} · score ${e.score > 0 ? '+' + e.score : e.score}`;
+      document.getElementById('detailTitle').textContent = e.label;
+      document.getElementById('detailType').textContent = e.type;
+      document.getElementById('detailWhat').textContent = e.what;
+      document.getElementById('detailTrigger').textContent = e.trigger;
+      document.getElementById('detailInsight').textContent = e.insight;
+      const pill = document.getElementById('detailPill');
+      pill.style.background = colors[e.color];
+    }
+
+    selectEvent(0);
+  </script>
+</body>
+</html>
